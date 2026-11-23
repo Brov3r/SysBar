@@ -20,14 +20,14 @@
 
 ## 🚀 Quick Start
 
-Install Windhawk with its development tools. From the project folder, run in **PowerShell as administrator**:
+Install Windhawk and extract the [latest release](https://github.com/Brov3r/SysBar/releases/latest) ZIP. From the extracted folder, run in **PowerShell as administrator**:
 
 ```powershell
-.\scripts\install.ps1 -RestartExplorer
-.\scripts\install-sensor.ps1  # Optional: read the ACPI thermal zone
+.\scripts\install.ps1 -SkipBuild -RestartExplorer
+.\scripts\install-sensor.ps1 -SkipBuild  # Optional: read the ACPI thermal zone
 ```
 
-To remove both the mod and the sensor, run `.\scripts\uninstall.ps1 -RestartExplorer`.
+Building from source? Install Windhawk's development tools and omit `-SkipBuild`. To uninstall, run `.\scripts\uninstall.ps1 -RestartExplorer`.
 
 ## ⚖️ License
 

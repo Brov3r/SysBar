@@ -8,6 +8,7 @@ permissions:
 jobs:
   windows:
     runs-on: windows-2022
+    timeout-minutes: 20
     defaults:
       run:
         shell: powershell
@@ -15,6 +16,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Extract Windhawk 1.7.3
         run: |
+          $ProgressPreference = 'SilentlyContinue'
           $installer = "$env:RUNNER_TEMP\windhawk-setup.exe"
           Invoke-WebRequest -UseBasicParsing -OutFile $installer -Uri 'https://github.com/ramensoftware/windhawk/releases/download/v1.7.3/windhawk_setup_offline.exe'
           if ((Get-FileHash $installer).Hash -ne '4d93016570f982326eebdfc9068e924ff21f6448534ea32672bb4c1d52a8193b') {
@@ -31,3 +33,30 @@ jobs:
             build/SysBar.dll
             build/SysBarSensor.exe
           if-no-files-found: error
+
+  release:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    needs: windows
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: SysBar-windows-x64
+          path: build
+      - name: Package and publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          version=$(awk '$2 == "@version" {print $3; exit}' mods/SysBar.wh.cpp)
+          [[ "$GITHUB_REF_NAME" == "v$version" ]]
+          test -s build/SysBar.dll && test -s build/SysBarSensor.exe
+          archive="SysBar-${GITHUB_REF_NAME}-windows-x64.zip"
+          zip -q -r "$archive" build scripts mods tools docs README.md LICENSE
+          sha256sum "$archive" > "$archive.sha256"
+          gh release create "$GITHUB_REF_NAME" --verify-tag --title "SysBar $version" \
+            --notes 'Download the Windows x64 ZIP and extract it. With Windhawk installed, run `.\scripts\install.ps1 -SkipBuild -RestartExplorer` in an administrator PowerShell. For the optional ACPI sensor, run `.\scripts\install-sensor.ps1 -SkipBuild`.' \
+            "$archive" "$archive.sha256"
