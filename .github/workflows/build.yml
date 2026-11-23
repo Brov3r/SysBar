@@ -13,7 +13,7 @@ jobs:
       run:
         shell: powershell
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Extract Windhawk 1.7.3
         run: |
           $ProgressPreference = 'SilentlyContinue'
@@ -26,7 +26,7 @@ jobs:
           if ($p.ExitCode -ne 0) { throw "Windhawk installer exited with $($p.ExitCode)" }
       - name: Build mod and sensor
         run: .\scripts\build.ps1 -WindhawkRoot "$env:RUNNER_TEMP\Windhawk"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: SysBar-windows-x64
           path: |
@@ -41,8 +41,8 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v7
         with:
           name: SysBar-windows-x64
           path: build
