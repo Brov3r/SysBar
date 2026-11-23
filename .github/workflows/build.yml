@@ -1,0 +1,33 @@
+name: Build
+
+on: [push, pull_request, workflow_dispatch]
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-2022
+    defaults:
+      run:
+        shell: powershell
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract Windhawk 1.7.3
+        run: |
+          $installer = "$env:RUNNER_TEMP\windhawk-setup.exe"
+          Invoke-WebRequest -UseBasicParsing -OutFile $installer -Uri 'https://github.com/ramensoftware/windhawk/releases/download/v1.7.3/windhawk_setup_offline.exe'
+          if ((Get-FileHash $installer).Hash -ne '4d93016570f982326eebdfc9068e924ff21f6448534ea32672bb4c1d52a8193b') {
+            throw 'Unexpected installer checksum'
+          }
+          $p = Start-Process $installer -ArgumentList "/S /PORTABLE /D=$env:RUNNER_TEMP\Windhawk" -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "Windhawk installer exited with $($p.ExitCode)" }
+      - name: Build mod and sensor
+        run: .\scripts\build.ps1 -WindhawkRoot "$env:RUNNER_TEMP\Windhawk"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SysBar-windows-x64
+          path: |
+            build/SysBar.dll
+            build/SysBarSensor.exe
+          if-no-files-found: error

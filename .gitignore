@@ -1,0 +1,12 @@
+﻿/build/
+*.dll
+*.exe
+*.pdb
+*.obj
+*.log
+.vs/
+*.user
+*.suo
+Thumbs.db
+Desktop.ini
+
