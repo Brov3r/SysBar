@@ -51,7 +51,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          version=$(awk '$2 == "@version" {print $3; exit}' mods/SysBar.wh.cpp)
+          version=$(awk '$2 == "@version" {print $3; exit}' mods/sysbar-taskbar-monitor.wh.cpp)
           [[ "$GITHUB_REF_NAME" == "v$version" ]]
           test -s build/SysBar.dll && test -s build/SysBarSensor.exe
           archive="SysBar-${GITHUB_REF_NAME}-windows-x64.zip"

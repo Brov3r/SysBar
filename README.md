@@ -15,7 +15,8 @@
 ## ✨ Features
 
 - CPU and GPU load and temperature (`25% · 69°C`), RAM usage, and network speeds.
-- Configurable font size, icons, refresh interval, and temperature alerts.
+- Choose memory usage in percent, used GiB or available GiB; optionally show system uptime.
+- Configure visible metrics, font size, icons, spacing, refresh interval, and temperature alerts in Windhawk's visual settings editor.
 - Automatically hides less important readings when space is tight.
 
 ## 🚀 Quick Start
@@ -28,6 +29,8 @@ Install Windhawk and extract the [latest release](https://github.com/Brov3r/SysB
 ```
 
 Building from source? Install Windhawk's development tools and omit `-SkipBuild`. To uninstall, run `.\scripts\uninstall.ps1 -RestartExplorer`.
+
+The [standalone Windhawk mod source](./mods/sysbar-taskbar-monitor.wh.cpp) also works without the helper. When no helper reading is available, SysBar tries Open Hardware Monitor and Windows thermal-zone providers. A thermal-zone reading isn't necessarily the CPU package temperature.
 
 ## ⚖️ License
 

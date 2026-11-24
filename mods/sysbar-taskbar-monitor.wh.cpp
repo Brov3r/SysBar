@@ -4,11 +4,52 @@
 // @description     CPU and GPU load and temperature, RAM usage and network speed with icons, embedded into the Windows 11 taskbar
 // @name:ru-RU      SysBar — монитор панели задач
 // @description:ru-RU Загрузка и температура CPU и GPU, использование памяти и скорость сети в панели задач Windows 11.
-// @version         1.1.1
+// @name:ar         SysBar — مراقب شريط المهام
+// @description:ar  يعرض حمل المعالج ومعالج الرسومات ودرجة حرارتهما، واستخدام الذاكرة وسرعة الشبكة في شريط مهام Windows 11.
+// @name:bn         SysBar — টাস্কবার মনিটর
+// @description:bn  Windows 11-এর টাস্কবারে CPU ও GPU-এর ব্যবহার ও তাপমাত্রা, RAM-এর ব্যবহার এবং নেটওয়ার্কের গতি দেখায়।
+// @name:de         SysBar – Taskleistenmonitor
+// @description:de  Zeigt Auslastung und Temperatur von CPU und GPU, RAM-Auslastung und Netzwerkgeschwindigkeit in der Windows-11-Taskleiste an.
+// @name:es         SysBar — Monitor de la barra de tareas
+// @description:es  Muestra el uso y la temperatura de la CPU y la GPU, el uso de RAM y la velocidad de red en la barra de tareas de Windows 11.
+// @name:fr         SysBar — Moniteur de la barre des tâches
+// @description:fr  Affiche la charge et la température du CPU et du GPU, la mémoire utilisée et le débit réseau dans la barre des tâches de Windows 11.
+// @name:hi         SysBar — टास्कबार मॉनिटर
+// @description:hi  Windows 11 के टास्कबार पर CPU और GPU का उपयोग और तापमान, RAM का उपयोग और नेटवर्क की गति दिखाता है।
+// @name:id         SysBar — Monitor bilah tugas
+// @description:id  Menampilkan beban dan suhu CPU serta GPU, penggunaan RAM, dan kecepatan jaringan di bilah tugas Windows 11.
+// @name:it         SysBar — Monitor della barra delle applicazioni
+// @description:it  Mostra il carico e la temperatura di CPU e GPU, l’utilizzo della RAM e la velocità di rete nella barra delle applicazioni di Windows 11.
+// @name:ja         SysBar — タスクバーモニター
+// @description:ja  Windows 11 のタスクバーに CPU・GPU の使用率と温度、メモリ使用率、ネットワーク速度を表示します。
+// @name:ko         SysBar — 작업 표시줄 모니터
+// @description:ko  Windows 11 작업 표시줄에 CPU와 GPU의 사용률 및 온도, 메모리 사용률, 네트워크 속도를 표시합니다.
+// @name:nl         SysBar — Taakbalkmonitor
+// @description:nl  Toont de belasting en temperatuur van CPU en GPU, het RAM-gebruik en de netwerksnelheid op de taakbalk van Windows 11.
+// @name:pl         SysBar — Monitor paska zadań
+// @description:pl  Wyświetla obciążenie i temperaturę CPU i GPU, użycie pamięci RAM oraz prędkość sieci na pasku zadań Windows 11.
+// @name:pt-BR      SysBar — Monitor da barra de tarefas
+// @description:pt-BR Exibe o uso e a temperatura da CPU e da GPU, o uso de RAM e a velocidade da rede na barra de tarefas do Windows 11.
+// @name:pt-PT      SysBar — Monitor da barra de tarefas
+// @description:pt-PT Mostra a utilização e a temperatura do CPU e do GPU, a utilização da RAM e a velocidade da rede na barra de tarefas do Windows 11.
+// @name:tr         SysBar — Görev çubuğu izleyicisi
+// @description:tr  Windows 11 görev çubuğunda CPU ve GPU kullanımını ve sıcaklıklarını, RAM kullanımını ve ağ hızını gösterir.
+// @name:uk         SysBar — Монітор панелі завдань
+// @description:uk  Показує завантаження й температуру процесора та відеокарти, використання оперативної пам’яті й швидкість мережі на панелі завдань Windows 11.
+// @name:vi         SysBar — Trình theo dõi trên thanh tác vụ
+// @description:vi  Hiển thị mức sử dụng và nhiệt độ của CPU và GPU, mức sử dụng RAM và tốc độ mạng trên thanh tác vụ Windows 11.
+// @name:zh-CN      SysBar — 任务栏监视器
+// @description:zh-CN 在 Windows 11 任务栏上显示 CPU 和 GPU 使用率与温度、内存使用率以及网络速度。
+// @name:zh-TW      SysBar — 工作列監視器
+// @description:zh-TW 在 Windows 11 工作列上顯示 CPU 和 GPU 使用率與溫度、記憶體使用率及網路速度。
+// @version         1.2.0
 // @author          Brov3r
+// @github          https://github.com/Brov3r
+// @homepage        https://github.com/Brov3r/SysBar
+// @license         MIT
 // @include         explorer.exe
 // @architecture    x86-64
-// @compilerOptions -lole32 -loleaut32 -lruntimeobject -liphlpapi -lpdh -lwbemuuid -lwinhttp
+// @compilerOptions -DWIN32_LEAN_AND_MEAN -lole32 -loleaut32 -lruntimeobject -liphlpapi -lpdh -lwbemuuid -lws2_32
 // ==/WindhawkMod==
 
 // ==WindhawkModReadme==
@@ -18,38 +59,614 @@ Displays CPU, GPU, memory and network readings on the primary Windows 11
 taskbar. CPU/GPU groups show **load · temperature**; yellow and red mark the
 configured temperature thresholds. Unavailable temperatures are hidden.
 
-GPU load uses NVIDIA NVML or Windows performance counters. The optional
-SysBar Sensor reads ACPI thermal zones: its value is a zone temperature,
-not necessarily the CPU package temperature.
+GPU load uses NVIDIA NVML or Windows performance counters. If the optional
+SysBar Sensor is unavailable, SysBar tries Open Hardware Monitor, then the
+built-in Windows ACPI and thermal-zone performance providers. A thermal-zone
+reading is not necessarily the CPU package temperature. If Windows exposes no
+usable reading, the temperature stays hidden.
 
-Restart Explorer after first installation. Configure text size, refresh
-interval, visible metrics and temperature thresholds in the mod settings.
+![SysBar on the Windows 11 taskbar](https://raw.githubusercontent.com/Brov3r/SysBar/v1.1.1/docs/sysbar-demo.png)
 
-License: MIT. Icon reference: Nieobie's game-icon-pack (CC0-1.0).
+On Windows 11 x64, enable the mod and open **Settings** to choose which
+readings to display. Memory can show percentage used, used GiB or available
+GiB. Enable uptime to see hours and minutes since the last restart.
+
+The [optional sensor and installation instructions](https://github.com/Brov3r/SysBar#-quick-start)
+are only needed if you want to try the helper for temperature readings.
+For help or bug reports, use the [issue tracker](https://github.com/Brov3r/SysBar/issues).
+
+License: MIT. Icon reference: [Nieobie's game-icon-pack](https://github.com/Nieobie/game-icon-pack) (CC0-1.0).
 */
 // ==/WindhawkModReadme==
 
 // ==WindhawkModSettings==
 /*
-- fontSize: 12
-  $name: Font size
-  $description: Text size in DIPs (12 matches the taskbar clock).
-- showTemps: 1
-  $name: Show temperatures
-- showNet: 1
-  $name: Show network speed
-- intervalSeconds: 1
-  $name: Refresh interval (seconds)
-  $description: Sampling and display interval, from 1 to 10 seconds.
-- showIcons: 1
-  $name: Show group icons
-- warnTemp: 75
-  $name: Warning temperature (C)
-- critTemp: 88
-  $name: Critical temperature (C)
-- debugLog: 0
-  $name: Write debug log
-  $description: Writes %LOCALAPPDATA%\SysBar\debug.log with sensor diagnostics.
+- metrics:
+  - hideCpu: false
+    $name: Hide CPU
+    $name:ru-RU: Скрыть процессор (CPU)
+    $name:de: "CPU ausblenden"
+    $name:es: "Ocultar CPU"
+    $name:fr: "Masquer le CPU"
+    $name:it: "Nascondi CPU"
+    $name:pt-BR: "Ocultar CPU"
+    $name:pt-PT: "Ocultar CPU"
+    $name:nl: "CPU verbergen"
+    $name:pl: "Ukryj CPU"
+    $name:uk: "Приховати процесор"
+    $name:tr: "CPU’yu gizle"
+    $name:id: "Sembunyikan CPU"
+    $name:vi: "Ẩn CPU"
+    $name:ja: "CPU を非表示にする"
+    $name:ko: "CPU 숨기기"
+    $name:zh-CN: "隐藏 CPU"
+    $name:zh-TW: "隱藏 CPU"
+    $name:ar: "إخفاء المعالج"
+    $name:hi: "CPU छिपाएँ"
+    $name:bn: "CPU লুকান"
+  - hideGpu: false
+    $name: Hide GPU
+    $name:ru-RU: Скрыть видеокарту (GPU)
+    $name:de: "GPU ausblenden"
+    $name:es: "Ocultar GPU"
+    $name:fr: "Masquer le GPU"
+    $name:it: "Nascondi GPU"
+    $name:pt-BR: "Ocultar GPU"
+    $name:pt-PT: "Ocultar GPU"
+    $name:nl: "GPU verbergen"
+    $name:pl: "Ukryj GPU"
+    $name:uk: "Приховати відеокарту"
+    $name:tr: "GPU’yu gizle"
+    $name:id: "Sembunyikan GPU"
+    $name:vi: "Ẩn GPU"
+    $name:ja: "GPU を非表示にする"
+    $name:ko: "GPU 숨기기"
+    $name:zh-CN: "隐藏 GPU"
+    $name:zh-TW: "隱藏 GPU"
+    $name:ar: "إخفاء معالج الرسومات"
+    $name:hi: "GPU छिपाएँ"
+    $name:bn: "GPU লুকান"
+  - hideRam: false
+    $name: Hide memory
+    $name:ru-RU: Скрыть оперативную память
+    $name:de: "Arbeitsspeicher ausblenden"
+    $name:es: "Ocultar memoria"
+    $name:fr: "Masquer la mémoire"
+    $name:it: "Nascondi memoria"
+    $name:pt-BR: "Ocultar memória"
+    $name:pt-PT: "Ocultar memória"
+    $name:nl: "Geheugen verbergen"
+    $name:pl: "Ukryj pamięć"
+    $name:uk: "Приховати оперативну пам’ять"
+    $name:tr: "Belleği gizle"
+    $name:id: "Sembunyikan memori"
+    $name:vi: "Ẩn bộ nhớ"
+    $name:ja: "メモリを非表示にする"
+    $name:ko: "메모리 숨기기"
+    $name:zh-CN: "隐藏内存"
+    $name:zh-TW: "隱藏記憶體"
+    $name:ar: "إخفاء الذاكرة"
+    $name:hi: "मेमोरी छिपाएँ"
+    $name:bn: "মেমরি লুকান"
+  - ramDisplay: percent
+    $name: Memory reading
+    $name:ru-RU: Что показывать для памяти
+    $name:de: "Speicheranzeige"
+    $name:es: "Indicador de memoria"
+    $name:fr: "Indicateur de mémoire"
+    $name:it: "Indicatore di memoria"
+    $name:pt-BR: "Indicador de memória"
+    $name:pt-PT: "Indicador de memória"
+    $name:nl: "Geheugenweergave"
+    $name:pl: "Wskaźnik pamięci"
+    $name:uk: "Показник пам’яті"
+    $name:tr: "Bellek göstergesi"
+    $name:id: "Indikator memori"
+    $name:vi: "Chỉ số bộ nhớ"
+    $name:ja: "メモリの表示内容"
+    $name:ko: "메모리 표시 방식"
+    $name:zh-CN: "内存显示方式"
+    $name:zh-TW: "記憶體顯示方式"
+    $name:ar: "مؤشر الذاكرة"
+    $name:hi: "मेमोरी संकेतक"
+    $name:bn: "মেমরি সূচক"
+    $options:
+    - percent: Usage (%)
+    - used: Used (GiB)
+    - free: Available (GiB)
+    $options:ru-RU:
+    - percent: Занято (%)
+    - used: Занято (ГиБ)
+    - free: Доступно (ГиБ)
+    $options:de:
+    - percent: "Belegt (%)"
+    - used: "Belegt (GiB)"
+    - free: "Verfügbar (GiB)"
+    $options:es:
+    - percent: "En uso (%)"
+    - used: "En uso (GiB)"
+    - free: "Disponible (GiB)"
+    $options:fr:
+    - percent: "Utilisée (%)"
+    - used: "Utilisée (Gio)"
+    - free: "Disponible (Gio)"
+    $options:it:
+    - percent: "In uso (%)"
+    - used: "In uso (GiB)"
+    - free: "Disponibile (GiB)"
+    $options:pt-BR:
+    - percent: "Em uso (%)"
+    - used: "Em uso (GiB)"
+    - free: "Disponível (GiB)"
+    $options:pt-PT:
+    - percent: "Utilizada (%)"
+    - used: "Utilizada (GiB)"
+    - free: "Disponível (GiB)"
+    $options:nl:
+    - percent: "In gebruik (%)"
+    - used: "In gebruik (GiB)"
+    - free: "Beschikbaar (GiB)"
+    $options:pl:
+    - percent: "Zajęta (%)"
+    - used: "Zajęta (GiB)"
+    - free: "Dostępna (GiB)"
+    $options:uk:
+    - percent: "Зайнято (%)"
+    - used: "Зайнято (ГіБ)"
+    - free: "Доступно (ГіБ)"
+    $options:tr:
+    - percent: "Kullanılan (%)"
+    - used: "Kullanılan (GiB)"
+    - free: "Kullanılabilir (GiB)"
+    $options:id:
+    - percent: "Terpakai (%)"
+    - used: "Terpakai (GiB)"
+    - free: "Tersedia (GiB)"
+    $options:vi:
+    - percent: "Đang dùng (%)"
+    - used: "Đang dùng (GiB)"
+    - free: "Khả dụng (GiB)"
+    $options:ja:
+    - percent: "使用率（%）"
+    - used: "使用中（GiB）"
+    - free: "利用可能（GiB）"
+    $options:ko:
+    - percent: "사용률(%)"
+    - used: "사용 중(GiB)"
+    - free: "사용 가능(GiB)"
+    $options:zh-CN:
+    - percent: "已用百分比 (%)"
+    - used: "已用容量 (GiB)"
+    - free: "可用容量 (GiB)"
+    $options:zh-TW:
+    - percent: "已用百分比 (%)"
+    - used: "已用容量 (GiB)"
+    - free: "可用容量 (GiB)"
+    $options:ar:
+    - percent: "المستخدم (%)"
+    - used: "المستخدم (GiB)"
+    - free: "المتاح (GiB)"
+    $options:hi:
+    - percent: "उपयोग (%)"
+    - used: "उपयोग में (GiB)"
+    - free: "उपलब्ध (GiB)"
+    $options:bn:
+    - percent: "ব্যবহৃত (%)"
+    - used: "ব্যবহৃত (GiB)"
+    - free: "উপলব্ধ (GiB)"
+  - showNet: true
+    $name: Show download and upload speeds
+    $name:ru-RU: Показывать скорость скачивания и отдачи
+    $name:de: "Download- und Uploadrate anzeigen"
+    $name:es: "Mostrar velocidades de descarga y subida"
+    $name:fr: "Afficher les débits descendant et montant"
+    $name:it: "Mostra velocità di download e upload"
+    $name:pt-BR: "Mostrar velocidades de download e upload"
+    $name:pt-PT: "Mostrar velocidades de receção e envio"
+    $name:nl: "Download- en uploadsnelheid tonen"
+    $name:pl: "Pokazuj prędkość pobierania i wysyłania"
+    $name:uk: "Показувати швидкість завантаження й віддачі"
+    $name:tr: "İndirme ve yükleme hızlarını göster"
+    $name:id: "Tampilkan kecepatan unduh dan unggah"
+    $name:vi: "Hiện tốc độ tải xuống và tải lên"
+    $name:ja: "ダウンロード速度とアップロード速度を表示"
+    $name:ko: "다운로드 및 업로드 속도 표시"
+    $name:zh-CN: "显示下载和上传速度"
+    $name:zh-TW: "顯示下載與上傳速度"
+    $name:ar: "عرض سرعتي التنزيل والرفع"
+    $name:hi: "डाउनलोड और अपलोड की गति दिखाएँ"
+    $name:bn: "ডাউনলোড ও আপলোডের গতি দেখান"
+  - showUptime: false
+    $name: Show uptime (hours:minutes)
+    $name:ru-RU: Показывать время после перезагрузки (часы:минуты)
+    $name:de: "Laufzeit anzeigen (Stunden:Minuten)"
+    $name:es: "Mostrar tiempo de actividad (horas:minutos)"
+    $name:fr: "Afficher le temps depuis le démarrage (heures:minutes)"
+    $name:it: "Mostra tempo di attività (ore:minuti)"
+    $name:pt-BR: "Mostrar tempo de atividade (horas:minutos)"
+    $name:pt-PT: "Mostrar tempo de atividade (horas:minutos)"
+    $name:nl: "Tijd sinds opstarten tonen (uren:minuten)"
+    $name:pl: "Pokazuj czas pracy (godziny:minuty)"
+    $name:uk: "Показувати час роботи (години:хвилини)"
+    $name:tr: "Çalışma süresini göster (saat:dakika)"
+    $name:id: "Tampilkan waktu aktif (jam:menit)"
+    $name:vi: "Hiện thời gian hoạt động (giờ:phút)"
+    $name:ja: "稼働時間を表示（時間:分）"
+    $name:ko: "가동 시간 표시(시간:분)"
+    $name:zh-CN: "显示系统运行时间（小时:分钟）"
+    $name:zh-TW: "顯示系統運作時間（小時:分鐘）"
+    $name:ar: "عرض مدة التشغيل (ساعات:دقائق)"
+    $name:hi: "चालू रहने की अवधि दिखाएँ (घंटे:मिनट)"
+    $name:bn: "চালু থাকার সময় দেখান (ঘণ্টা:মিনিট)"
+  $name: Readings
+  $name:ru-RU: Показатели
+  $name:de: "Messwerte"
+  $name:es: "Indicadores"
+  $name:fr: "Indicateurs"
+  $name:it: "Indicatori"
+  $name:pt-BR: "Indicadores"
+  $name:pt-PT: "Indicadores"
+  $name:nl: "Meetwaarden"
+  $name:pl: "Wskaźniki"
+  $name:uk: "Показники"
+  $name:tr: "Göstergeler"
+  $name:id: "Indikator"
+  $name:vi: "Chỉ số"
+  $name:ja: "表示項目"
+  $name:ko: "표시 항목"
+  $name:zh-CN: "显示指标"
+  $name:zh-TW: "顯示指標"
+  $name:ar: "المؤشرات"
+  $name:hi: "संकेतक"
+  $name:bn: "সূচক"
+- appearance:
+  - fontSize: 12
+    $name: Text size (8–24 DIPs)
+    $name:ru-RU: Размер текста (8–24 логических пикселя)
+    $name:de: "Schriftgröße (8–24 DIP)"
+    $name:es: "Tamaño del texto (8–24 DIP)"
+    $name:fr: "Taille du texte (8–24 DIP)"
+    $name:it: "Dimensione testo (8–24 DIP)"
+    $name:pt-BR: "Tamanho do texto (8–24 DIP)"
+    $name:pt-PT: "Tamanho do texto (8–24 DIP)"
+    $name:nl: "Tekstgrootte (8–24 DIP)"
+    $name:pl: "Rozmiar tekstu (8–24 DIP)"
+    $name:uk: "Розмір тексту (8–24 DIP)"
+    $name:tr: "Yazı boyutu (8–24 DIP)"
+    $name:id: "Ukuran teks (8–24 DIP)"
+    $name:vi: "Cỡ chữ (8–24 DIP)"
+    $name:ja: "文字サイズ（8～24 DIP）"
+    $name:ko: "글자 크기(8~24 DIP)"
+    $name:zh-CN: "文字大小（8–24 DIP）"
+    $name:zh-TW: "文字大小（8–24 DIP）"
+    $name:ar: "حجم النص (8–24 DIP)"
+    $name:hi: "टेक्स्ट का आकार (8–24 DIP)"
+    $name:bn: "লেখার আকার (8–24 DIP)"
+  - showIcons: true
+    $name: Show metric icons and network arrows
+    $name:ru-RU: Показывать значки показателей и стрелки сети
+    $name:de: "Symbole und Netzwerkpfeile anzeigen"
+    $name:es: "Mostrar iconos y flechas de red"
+    $name:fr: "Afficher les icônes et les flèches réseau"
+    $name:it: "Mostra icone e frecce di rete"
+    $name:pt-BR: "Mostrar ícones e setas de rede"
+    $name:pt-PT: "Mostrar ícones e setas de rede"
+    $name:nl: "Pictogrammen en netwerkpijlen tonen"
+    $name:pl: "Pokazuj ikony i strzałki sieci"
+    $name:uk: "Показувати піктограми й мережеві стрілки"
+    $name:tr: "Simgeleri ve ağ oklarını göster"
+    $name:id: "Tampilkan ikon dan panah jaringan"
+    $name:vi: "Hiện biểu tượng và mũi tên mạng"
+    $name:ja: "アイコンと通信方向の矢印を表示"
+    $name:ko: "아이콘과 네트워크 화살표 표시"
+    $name:zh-CN: "显示指标图标和网络箭头"
+    $name:zh-TW: "顯示指標圖示與網路箭頭"
+    $name:ar: "عرض الرموز وأسهم الشبكة"
+    $name:hi: "आइकन और नेटवर्क के तीर दिखाएँ"
+    $name:bn: "আইকন ও নেটওয়ার্কের তীর দেখান"
+  - metricGap: 13
+    $name: Space between visible groups (0–64 DIPs)
+    $name:ru-RU: Интервал между видимыми группами (0–64 логических пикселя)
+    $name:de: "Abstand zwischen sichtbaren Gruppen (0–64 DIP)"
+    $name:es: "Espacio entre grupos visibles (0–64 DIP)"
+    $name:fr: "Espace entre groupes visibles (0–64 DIP)"
+    $name:it: "Spazio tra gruppi visibili (0–64 DIP)"
+    $name:pt-BR: "Espaço entre grupos visíveis (0–64 DIP)"
+    $name:pt-PT: "Espaço entre grupos visíveis (0–64 DIP)"
+    $name:nl: "Afstand tussen zichtbare groepen (0–64 DIP)"
+    $name:pl: "Odstęp między widocznymi grupami (0–64 DIP)"
+    $name:uk: "Відстань між видимими групами (0–64 DIP)"
+    $name:tr: "Görünür gruplar arasındaki boşluk (0–64 DIP)"
+    $name:id: "Jarak antarkelompok yang terlihat (0–64 DIP)"
+    $name:vi: "Khoảng cách giữa các nhóm hiển thị (0–64 DIP)"
+    $name:ja: "表示グループ間の余白（0～64 DIP）"
+    $name:ko: "표시 그룹 사이 간격(0~64 DIP)"
+    $name:zh-CN: "可见分组之间的间距（0–64 DIP）"
+    $name:zh-TW: "可見群組之間的間距（0–64 DIP）"
+    $name:ar: "المسافة بين المجموعات الظاهرة (0–64 DIP)"
+    $name:hi: "दिख रहे समूहों के बीच अंतर (0–64 DIP)"
+    $name:bn: "দৃশ্যমান গোষ্ঠীগুলির মধ্যের ফাঁক (0–64 DIP)"
+  - trayGap: 6
+    $name: Gap to the notification area (0–128 DIPs)
+    $name:ru-RU: Отступ от системного трея справа (0–128 логических пикселей)
+    $name:de: "Abstand zum Infobereich (0–128 DIP)"
+    $name:es: "Distancia al área de notificación (0–128 DIP)"
+    $name:fr: "Distance à la zone de notification (0–128 DIP)"
+    $name:it: "Distanza dall’area di notifica (0–128 DIP)"
+    $name:pt-BR: "Distância até a área de notificação (0–128 DIP)"
+    $name:pt-PT: "Distância à área de notificação (0–128 DIP)"
+    $name:nl: "Afstand tot het systeemvak (0–128 DIP)"
+    $name:pl: "Odstęp od obszaru powiadomień (0–128 DIP)"
+    $name:uk: "Відступ від області сповіщень (0–128 DIP)"
+    $name:tr: "Bildirim alanına uzaklık (0–128 DIP)"
+    $name:id: "Jarak ke area notifikasi (0–128 DIP)"
+    $name:vi: "Khoảng cách đến vùng thông báo (0–128 DIP)"
+    $name:ja: "通知領域との間隔（0～128 DIP）"
+    $name:ko: "알림 영역까지의 간격(0~128 DIP)"
+    $name:zh-CN: "距通知区域的间距（0–128 DIP）"
+    $name:zh-TW: "與通知區域的間距（0–128 DIP）"
+    $name:ar: "المسافة إلى منطقة الإعلام (0–128 DIP)"
+    $name:hi: "सूचना क्षेत्र से दूरी (0–128 DIP)"
+    $name:bn: "বিজ্ঞপ্তি এলাকা থেকে দূরত্ব (0–128 DIP)"
+  $name: Appearance and spacing
+  $name:ru-RU: Оформление и отступы
+  $name:de: "Darstellung und Abstände"
+  $name:es: "Aspecto y espaciado"
+  $name:fr: "Apparence et espacement"
+  $name:it: "Aspetto e spaziatura"
+  $name:pt-BR: "Aparência e espaçamento"
+  $name:pt-PT: "Aspeto e espaçamento"
+  $name:nl: "Weergave en afstanden"
+  $name:pl: "Wygląd i odstępy"
+  $name:uk: "Оформлення та відступи"
+  $name:tr: "Görünüm ve aralıklar"
+  $name:id: "Tampilan dan jarak"
+  $name:vi: "Giao diện và khoảng cách"
+  $name:ja: "外観と間隔"
+  $name:ko: "모양 및 간격"
+  $name:zh-CN: "外观与间距"
+  $name:zh-TW: "外觀與間距"
+  $name:ar: "المظهر والتباعد"
+  $name:hi: "दिखावट और अंतर"
+  $name:bn: "চেহারা ও ব্যবধান"
+- temperature:
+  - showTemps: true
+    $name: Show available temperatures next to CPU and GPU load
+    $name:ru-RU: Показывать доступную температуру рядом с загрузкой CPU и GPU
+    $name:de: "Verfügbare Temperaturen neben der CPU- und GPU-Auslastung anzeigen"
+    $name:es: "Mostrar las temperaturas disponibles junto al uso de CPU y GPU"
+    $name:fr: "Afficher les températures disponibles à côté de la charge CPU et GPU"
+    $name:it: "Mostra le temperature disponibili accanto al carico di CPU e GPU"
+    $name:pt-BR: "Mostrar temperaturas disponíveis ao lado do uso da CPU e da GPU"
+    $name:pt-PT: "Mostrar as temperaturas disponíveis junto à utilização do CPU e do GPU"
+    $name:nl: "Beschikbare temperaturen naast CPU- en GPU-belasting tonen"
+    $name:pl: "Pokazuj dostępne temperatury obok obciążenia CPU i GPU"
+    $name:uk: "Показувати доступні температури поруч із завантаженням CPU і GPU"
+    $name:tr: "CPU ve GPU kullanımının yanında mevcut sıcaklıkları göster"
+    $name:id: "Tampilkan suhu yang tersedia di samping beban CPU dan GPU"
+    $name:vi: "Hiện nhiệt độ hiện có bên cạnh mức sử dụng CPU và GPU"
+    $name:ja: "取得できた温度を CPU・GPU 使用率の横に表示"
+    $name:ko: "CPU 및 GPU 사용률 옆에 확인 가능한 온도 표시"
+    $name:zh-CN: "在 CPU 和 GPU 使用率旁显示可用的温度读数"
+    $name:zh-TW: "在 CPU 和 GPU 使用率旁顯示可取得的溫度"
+    $name:ar: "عرض درجات الحرارة المتاحة بجوار حمل المعالج ومعالج الرسومات"
+    $name:hi: "CPU और GPU के उपयोग के पास उपलब्ध तापमान दिखाएँ"
+    $name:bn: "CPU ও GPU ব্যবহারের পাশে উপলব্ধ তাপমাত্রা দেখান"
+  - warnTemp: 75
+    $name: Warning color from (30–120 °C)
+    $name:ru-RU: Порог предупреждения (30–120 °C)
+    $name:de: "Warnschwelle (30–120 °C)"
+    $name:es: "Umbral de aviso (30–120 °C)"
+    $name:fr: "Seuil d’avertissement (30–120 °C)"
+    $name:it: "Soglia di avviso (30–120 °C)"
+    $name:pt-BR: "Limite de aviso (30–120 °C)"
+    $name:pt-PT: "Limiar de aviso (30–120 °C)"
+    $name:nl: "Waarschuwingsdrempel (30–120 °C)"
+    $name:pl: "Próg ostrzeżenia (30–120 °C)"
+    $name:uk: "Поріг попередження (30–120 °C)"
+    $name:tr: "Uyarı eşiği (30–120 °C)"
+    $name:id: "Ambang peringatan (30–120 °C)"
+    $name:vi: "Ngưỡng cảnh báo (30–120 °C)"
+    $name:ja: "警告温度（30～120 °C）"
+    $name:ko: "경고 온도(30~120 °C)"
+    $name:zh-CN: "警告温度（30–120 °C）"
+    $name:zh-TW: "警示溫度（30–120 °C）"
+    $name:ar: "حد التحذير (30–120 °C)"
+    $name:hi: "चेतावनी की सीमा (30–120 °C)"
+    $name:bn: "সতর্কতার সীমা (30–120 °C)"
+    $description: Amber in dark theme, brown in light theme.
+    $description:ru-RU: Янтарный цвет в тёмной теме, коричневый в светлой.
+    $description:de: "Bernsteinfarben im dunklen Design, braun im hellen."
+    $description:es: "Ámbar en el tema oscuro y marrón en el claro."
+    $description:fr: "Ambre en thème sombre, brun en thème clair."
+    $description:it: "Ambra nel tema scuro, marrone in quello chiaro."
+    $description:pt-BR: "Âmbar no tema escuro e marrom no tema claro."
+    $description:pt-PT: "Âmbar no tema escuro e castanho no tema claro."
+    $description:nl: "Amber in het donkere thema, bruin in het lichte."
+    $description:pl: "Bursztynowy w ciemnym motywie, brązowy w jasnym."
+    $description:uk: "Бурштиновий у темній темі, коричневий у світлій."
+    $description:tr: "Koyu temada kehribar, açık temada kahverengi."
+    $description:id: "Kuning ambar pada tema gelap, cokelat pada tema terang."
+    $description:vi: "Màu hổ phách trong giao diện tối, màu nâu trong giao diện sáng."
+    $description:ja: "ダークテーマでは琥珀色、ライトテーマでは茶色になります。"
+    $description:ko: "어두운 테마에서는 호박색, 밝은 테마에서는 갈색입니다."
+    $description:zh-CN: "深色主题下为琥珀色，浅色主题下为棕色。"
+    $description:zh-TW: "深色佈景主題中為琥珀色，淺色佈景主題中為棕色。"
+    $description:ar: "كهرماني في النسق الداكن وبني في النسق الفاتح."
+    $description:hi: "गहरे थीम में अंबर और हल्के थीम में भूरा रंग।"
+    $description:bn: "গাঢ় থিমে অ্যাম্বার, হালকা থিমে বাদামি।"
+  - critTemp: 88
+    $name: Red color from (°C)
+    $name:ru-RU: Порог красной подсветки (°C)
+    $name:de: "Rote Anzeige ab (°C)"
+    $name:es: "Mostrar en rojo a partir de (°C)"
+    $name:fr: "Seuil d’affichage en rouge (°C)"
+    $name:it: "Soglia del colore rosso (°C)"
+    $name:pt-BR: "Exibir em vermelho a partir de (°C)"
+    $name:pt-PT: "Mostrar a vermelho a partir de (°C)"
+    $name:nl: "Rood vanaf (°C)"
+    $name:pl: "Próg koloru czerwonego (°C)"
+    $name:uk: "Поріг червоного кольору (°C)"
+    $name:tr: "Kırmızı renk eşiği (°C)"
+    $name:id: "Ambang warna merah (°C)"
+    $name:vi: "Ngưỡng chuyển sang màu đỏ (°C)"
+    $name:ja: "赤く表示する温度（°C）"
+    $name:ko: "빨간색으로 표시할 온도(°C)"
+    $name:zh-CN: "标红温度（°C）"
+    $name:zh-TW: "顯示為紅色的溫度（°C）"
+    $name:ar: "حد العرض باللون الأحمر (°C)"
+    $name:hi: "लाल रंग की सीमा (°C)"
+    $name:bn: "লাল রঙের সীমা (°C)"
+    $description: At least 1 degree above the warning threshold, up to 130 °C.
+    $description:ru-RU: Минимум на 1 °C выше предупреждения, максимум 130 °C.
+    $description:de: "Mindestens 1 °C über der Warnschwelle, höchstens 130 °C."
+    $description:es: "Al menos 1 °C por encima del aviso, hasta 130 °C."
+    $description:fr: "Au moins 1 °C au-dessus du seuil d’avertissement, jusqu’à 130 °C."
+    $description:it: "Almeno 1 °C sopra la soglia di avviso, fino a 130 °C."
+    $description:pt-BR: "Pelo menos 1 °C acima do limite de aviso, até 130 °C."
+    $description:pt-PT: "Pelo menos 1 °C acima do limiar de aviso, até 130 °C."
+    $description:nl: "Minstens 1 °C boven de waarschuwingsdrempel, maximaal 130 °C."
+    $description:pl: "Co najmniej 1 °C powyżej progu ostrzeżenia, maksymalnie 130 °C."
+    $description:uk: "Принаймні на 1 °C вище порога попередження, максимум 130 °C."
+    $description:tr: "Uyarı eşiğinin en az 1 °C üzerinde, en fazla 130 °C."
+    $description:id: "Minimal 1 °C di atas ambang peringatan, maksimal 130 °C."
+    $description:vi: "Cao hơn ngưỡng cảnh báo ít nhất 1 °C, tối đa 130 °C."
+    $description:ja: "警告温度より 1 °C 以上高く、上限は 130 °C です。"
+    $description:ko: "경고 온도보다 1 °C 이상 높아야 하며 최대 130 °C입니다."
+    $description:zh-CN: "至少比警告温度高 1 °C，最高 130 °C。"
+    $description:zh-TW: "至少比警示溫度高 1 °C，最高 130 °C。"
+    $description:ar: "أعلى من حد التحذير بدرجة مئوية واحدة على الأقل، وبحد أقصى 130 °C."
+    $description:hi: "चेतावनी की सीमा से कम से कम 1 °C अधिक, अधिकतम 130 °C।"
+    $description:bn: "সতর্কতার সীমার চেয়ে অন্তত 1 °C বেশি, সর্বোচ্চ 130 °C।"
+  $name: Temperatures and alerts
+  $name:ru-RU: Температуры и предупреждения
+  $name:de: "Temperaturen und Warnungen"
+  $name:es: "Temperaturas y avisos"
+  $name:fr: "Températures et alertes"
+  $name:it: "Temperature e avvisi"
+  $name:pt-BR: "Temperaturas e alertas"
+  $name:pt-PT: "Temperaturas e avisos"
+  $name:nl: "Temperaturen en waarschuwingen"
+  $name:pl: "Temperatury i ostrzeżenia"
+  $name:uk: "Температури й попередження"
+  $name:tr: "Sıcaklıklar ve uyarılar"
+  $name:id: "Suhu dan peringatan"
+  $name:vi: "Nhiệt độ và cảnh báo"
+  $name:ja: "温度と警告"
+  $name:ko: "온도 및 경고"
+  $name:zh-CN: "温度与警告"
+  $name:zh-TW: "溫度與警示"
+  $name:ar: "درجات الحرارة والتنبيهات"
+  $name:hi: "तापमान और चेतावनियाँ"
+  $name:bn: "তাপমাত্রা ও সতর্কতা"
+- operation:
+  - intervalSeconds: 1
+    $name: Refresh interval (1–10 seconds)
+    $name:ru-RU: Интервал обновления (1–10 секунд)
+    $name:de: "Aktualisierungsintervall (1–10 Sekunden)"
+    $name:es: "Intervalo de actualización (1–10 segundos)"
+    $name:fr: "Intervalle d’actualisation (1–10 secondes)"
+    $name:it: "Intervallo di aggiornamento (1–10 secondi)"
+    $name:pt-BR: "Intervalo de atualização (1–10 segundos)"
+    $name:pt-PT: "Intervalo de atualização (1–10 segundos)"
+    $name:nl: "Verversingsinterval (1–10 seconden)"
+    $name:pl: "Odstęp odświeżania (1–10 sekund)"
+    $name:uk: "Інтервал оновлення (1–10 секунд)"
+    $name:tr: "Yenileme aralığı (1–10 saniye)"
+    $name:id: "Interval pembaruan (1–10 detik)"
+    $name:vi: "Chu kỳ làm mới (1–10 giây)"
+    $name:ja: "更新間隔（1～10 秒）"
+    $name:ko: "새로 고침 간격(1~10초)"
+    $name:zh-CN: "刷新间隔（1–10 秒）"
+    $name:zh-TW: "更新間隔（1–10 秒）"
+    $name:ar: "فترة التحديث (1–10 ثوانٍ)"
+    $name:hi: "अपडेट का अंतराल (1–10 सेकंड)"
+    $name:bn: "হালনাগাদের ব্যবধান (1–10 সেকেন্ড)"
+    $description: WMI temperature readings are queried at most once every 5 seconds.
+    $description:ru-RU: Температура через WMI опрашивается не чаще раза в 5 секунд.
+    $description:de: "WMI-Temperaturen werden höchstens alle 5 Sekunden abgefragt."
+    $description:es: "Las temperaturas por WMI se consultan como máximo una vez cada 5 segundos."
+    $description:fr: "Les températures WMI sont relevées au plus une fois toutes les 5 secondes."
+    $description:it: "Le temperature WMI vengono lette al massimo una volta ogni 5 secondi."
+    $description:pt-BR: "As temperaturas via WMI são consultadas no máximo uma vez a cada 5 segundos."
+    $description:pt-PT: "As temperaturas por WMI são consultadas no máximo uma vez a cada 5 segundos."
+    $description:nl: "WMI-temperaturen worden hoogstens eens per 5 seconden opgevraagd."
+    $description:pl: "Temperatury przez WMI są odczytywane najwyżej raz na 5 sekund."
+    $description:uk: "Температури через WMI зчитуються не частіше ніж раз на 5 секунд."
+    $description:tr: "WMI sıcaklıkları 5 saniyede en fazla bir kez okunur."
+    $description:id: "Suhu melalui WMI dibaca paling sering sekali setiap 5 detik."
+    $description:vi: "Nhiệt độ qua WMI được đọc tối đa một lần mỗi 5 giây."
+    $description:ja: "WMI による温度取得は最短でも 5 秒間隔です。"
+    $description:ko: "WMI 온도는 5초에 한 번 이하로 조회합니다."
+    $description:zh-CN: "通过 WMI 获取温度的间隔至少为 5 秒。"
+    $description:zh-TW: "透過 WMI 讀取溫度的間隔至少為 5 秒。"
+    $description:ar: "تُقرأ درجات الحرارة عبر WMI مرة واحدة كل 5 ثوانٍ على الأكثر."
+    $description:hi: "WMI से तापमान पाँच सेकंड में अधिकतम एक बार पढ़ा जाता है।"
+    $description:bn: "WMI দিয়ে প্রতি 5 সেকেন্ডে সর্বোচ্চ একবার তাপমাত্রা পড়া হয়।"
+  - debugLog: false
+    $name: Write diagnostic log
+    $name:ru-RU: Записывать журнал диагностики
+    $name:de: "Diagnoseprotokoll schreiben"
+    $name:es: "Guardar registro de diagnóstico"
+    $name:fr: "Écrire le journal de diagnostic"
+    $name:it: "Scrivi registro diagnostico"
+    $name:pt-BR: "Gravar log de diagnóstico"
+    $name:pt-PT: "Gravar registo de diagnóstico"
+    $name:nl: "Diagnoselogboek schrijven"
+    $name:pl: "Zapisuj dziennik diagnostyczny"
+    $name:uk: "Записувати журнал діагностики"
+    $name:tr: "Tanılama günlüğünü yaz"
+    $name:id: "Tulis log diagnostik"
+    $name:vi: "Ghi nhật ký chẩn đoán"
+    $name:ja: "診断ログを記録"
+    $name:ko: "진단 로그 기록"
+    $name:zh-CN: "记录诊断日志"
+    $name:zh-TW: "寫入診斷記錄"
+    $name:ar: "كتابة سجل التشخيص"
+    $name:hi: "निदान लॉग लिखें"
+    $name:bn: "নির্ণয় লগ লিখুন"
+    $description: Writes sensor diagnostics to %LOCALAPPDATA%\SysBar\debug.log.
+    $description:ru-RU: Данные диагностики сохраняются в %LOCALAPPDATA%\SysBar\debug.log.
+    $description:de: "Sensordiagnose wird in %LOCALAPPDATA%\\SysBar\\debug.log gespeichert."
+    $description:es: "El diagnóstico de los sensores se guarda en %LOCALAPPDATA%\\SysBar\\debug.log."
+    $description:fr: "Le diagnostic des capteurs est enregistré dans %LOCALAPPDATA%\\SysBar\\debug.log."
+    $description:it: "La diagnostica dei sensori viene salvata in %LOCALAPPDATA%\\SysBar\\debug.log."
+    $description:pt-BR: "O diagnóstico dos sensores é salvo em %LOCALAPPDATA%\\SysBar\\debug.log."
+    $description:pt-PT: "O diagnóstico dos sensores é guardado em %LOCALAPPDATA%\\SysBar\\debug.log."
+    $description:nl: "Sensordiagnose wordt opgeslagen in %LOCALAPPDATA%\\SysBar\\debug.log."
+    $description:pl: "Diagnostyka czujników jest zapisywana w %LOCALAPPDATA%\\SysBar\\debug.log."
+    $description:uk: "Діагностика датчиків зберігається у %LOCALAPPDATA%\\SysBar\\debug.log."
+    $description:tr: "Sensör tanılama bilgileri %LOCALAPPDATA%\\SysBar\\debug.log dosyasına yazılır."
+    $description:id: "Diagnostik sensor disimpan di %LOCALAPPDATA%\\SysBar\\debug.log."
+    $description:vi: "Thông tin chẩn đoán cảm biến được lưu vào %LOCALAPPDATA%\\SysBar\\debug.log."
+    $description:ja: "センサーの診断情報を %LOCALAPPDATA%\\SysBar\\debug.log に保存します。"
+    $description:ko: "센서 진단 정보를 %LOCALAPPDATA%\\SysBar\\debug.log에 저장합니다."
+    $description:zh-CN: "传感器诊断信息保存在 %LOCALAPPDATA%\\SysBar\\debug.log。"
+    $description:zh-TW: "感測器診斷資訊儲存於 %LOCALAPPDATA%\\SysBar\\debug.log。"
+    $description:ar: "تُحفظ بيانات تشخيص المستشعرات في %LOCALAPPDATA%\\SysBar\\debug.log."
+    $description:hi: "सेंसर की निदान जानकारी %LOCALAPPDATA%\\SysBar\\debug.log में सहेजी जाती है।"
+    $description:bn: "সেন্সরের নির্ণয় তথ্য %LOCALAPPDATA%\\SysBar\\debug.log-এ সংরক্ষিত হয়।"
+  $name: Refresh and diagnostics
+  $name:ru-RU: Обновление и диагностика
+  $name:de: "Aktualisierung und Diagnose"
+  $name:es: "Actualización y diagnóstico"
+  $name:fr: "Actualisation et diagnostic"
+  $name:it: "Aggiornamento e diagnostica"
+  $name:pt-BR: "Atualização e diagnóstico"
+  $name:pt-PT: "Atualização e diagnóstico"
+  $name:nl: "Vernieuwen en diagnose"
+  $name:pl: "Odświeżanie i diagnostyka"
+  $name:uk: "Оновлення й діагностика"
+  $name:tr: "Yenileme ve tanılama"
+  $name:id: "Pembaruan dan diagnostik"
+  $name:vi: "Làm mới và chẩn đoán"
+  $name:ja: "更新と診断"
+  $name:ko: "새로 고침 및 진단"
+  $name:zh-CN: "刷新与诊断"
+  $name:zh-TW: "更新與診斷"
+  $name:ar: "التحديث والتشخيص"
+  $name:hi: "अपडेट और निदान"
+  $name:bn: "হালনাগাদ ও নির্ণয়"
 */
 // ==/WindhawkModSettings==
 
@@ -108,11 +725,15 @@ constexpr UINT kRunOnTaskbarThreadMessage = WM_APP + 0x5B1;
 // Settings
 // ---------------------------------------------------------------------------
 
+enum class RamDisplay { Percent, Used, Free };
 struct Settings {
+    bool showCpu = true, showGpu = true, showRam = true, showUptime = false;
+    RamDisplay ramDisplay = RamDisplay::Percent;
     int fontSize = 12;
     bool showTemps = true;
     bool showNet = true;
     bool showIcons = true;
+    int metricGap = 13, trayGap = 6;
     int warnTemp = 75;
     int critTemp = 88;
     bool debugLog = false;
@@ -131,26 +752,37 @@ void DebugLog(const wchar_t* format, ...);
 void LoadSettings() {
     // Values are zero when the mod has never been configured (for example,
     // when installed manually). Fall back to sane defaults in that case.
-    const int fontSize = Wh_GetIntSetting(L"fontSize");
-    const int showTemps = Wh_GetIntSetting(L"showTemps");
-    const int showNet = Wh_GetIntSetting(L"showNet");
-    const int showIcons = Wh_GetIntSetting(L"showIcons");
-    const int warnTemp = Wh_GetIntSetting(L"warnTemp");
-    const int critTemp = Wh_GetIntSetting(L"critTemp");
-    const int debugLog = Wh_GetIntSetting(L"debugLog");
+    const int fontSize = Wh_GetIntSetting(L"appearance.fontSize");
+    const int showTemps = Wh_GetIntSetting(L"temperature.showTemps");
+    const int showNet = Wh_GetIntSetting(L"metrics.showNet");
+    const int showIcons = Wh_GetIntSetting(L"appearance.showIcons");
+    const int warnTemp = Wh_GetIntSetting(L"temperature.warnTemp");
+    const int critTemp = Wh_GetIntSetting(L"temperature.critTemp");
+    const int debugLog = Wh_GetIntSetting(L"operation.debugLog");
 
     const bool unconfigured = fontSize == 0 && showTemps == 0 && showNet == 0 &&
                               showIcons == 0 && warnTemp == 0 && critTemp == 0;
 
     Settings s;
+    s.showCpu = !Wh_GetIntSetting(L"metrics.hideCpu");
+    s.showGpu = !Wh_GetIntSetting(L"metrics.hideGpu");
+    s.showRam = !Wh_GetIntSetting(L"metrics.hideRam");
+    s.showUptime = Wh_GetIntSetting(L"metrics.showUptime") != 0;
+    if (auto mode = Wh_GetStringSetting(L"metrics.ramDisplay")) {
+        if (!wcscmp(mode, L"used")) s.ramDisplay = RamDisplay::Used;
+        if (!wcscmp(mode, L"free")) s.ramDisplay = RamDisplay::Free;
+        Wh_FreeStringSetting(mode);
+    }
     s.fontSize = std::clamp(unconfigured ? 12 : fontSize, 8, 24);
     s.showTemps = unconfigured || showTemps != 0;
     s.showNet = unconfigured || showNet != 0;
     s.showIcons = unconfigured || showIcons != 0;
+    s.metricGap = std::clamp(unconfigured ? 13 : Wh_GetIntSetting(L"appearance.metricGap"), 0, 64);
+    s.trayGap = std::clamp(unconfigured ? 6 : Wh_GetIntSetting(L"appearance.trayGap"), 0, 128);
     s.warnTemp = std::clamp(unconfigured ? 75 : warnTemp, 30, 120);
     s.critTemp = std::clamp(unconfigured ? 88 : critTemp, s.warnTemp + 1, 130);
     s.debugLog = debugLog != 0;
-    s.intervalSeconds = std::clamp(Wh_GetIntSetting(L"intervalSeconds"), 1, 10);
+    s.intervalSeconds = std::clamp(Wh_GetIntSetting(L"operation.intervalSeconds"), 1, 10);
     std::lock_guard lock(g_settingsMutex);
     g_settings = s;
 }
@@ -212,6 +844,7 @@ struct Snapshot {
     double gpuPct = -1;
     double gpuTemp = -1;
     double ramPct = -1;
+    double usedGiB = -1, freeGiB = -1;
     double netDown = -1;
     double netUp = -1;
     bool gpuAvailable = false;
@@ -271,13 +904,16 @@ std::optional<double> ReadCpuLoad() {
                       0.0, 100.0);
 }
 
-double ReadRamPct() {
+void ReadRam(Snapshot& snapshot) {
     MEMORYSTATUSEX memory{};
     memory.dwLength = sizeof(memory);
     if (!GlobalMemoryStatusEx(&memory)) {
-        return -1;
+        return;
     }
-    return static_cast<double>(memory.dwMemoryLoad);
+    snapshot.ramPct = memory.dwMemoryLoad;
+    constexpr double gib = 1024.0 * 1024 * 1024;
+    snapshot.freeGiB = memory.ullAvailPhys / gib;
+    snapshot.usedGiB = (memory.ullTotalPhys - memory.ullAvailPhys) / gib;
 }
 
 // Published by the tiny SYSTEM helper (tools/SysBarSensor.cs) through a
@@ -729,15 +1365,15 @@ class WmiConnection {
         return best;
     }
 
-    // ACPI thermal zones report tenths of Kelvin.
-    std::optional<double> QueryAcpiTemperature() {
+    std::optional<double> QueryZoneTemperature(bool performanceCounters) {
         if (!services_) {
             return std::nullopt;
         }
         IEnumWbemClassObject* enumerator = nullptr;
         BSTR language = SysAllocString(L"WQL");
-        BSTR query = SysAllocString(
-            L"SELECT CurrentTemperature FROM MSAcpi_ThermalZoneTemperature");
+        BSTR query = SysAllocString(performanceCounters
+            ? L"SELECT * FROM Win32_PerfFormattedData_Counters_ThermalZoneInformation"
+            : L"SELECT CurrentTemperature FROM MSAcpi_ThermalZoneTemperature");
         HRESULT hr = services_->ExecQuery(
             language, query,
             WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, nullptr,
@@ -755,16 +1391,21 @@ class WmiConnection {
         ULONG returned = 0;
         while (!g_workerStop && enumerator->Next(500, 1, &object, &returned) == S_OK &&
                returned == 1) {
-            VARIANT valueVar;
-            VariantInit(&valueVar);
-            object->Get(L"CurrentTemperature", 0, &valueVar, nullptr, nullptr);
-            double celsius = -1;
-            if (valueVar.vt == VT_I4) {
-                celsius = valueVar.lVal / 10.0 - 273.15;
-            } else if (valueVar.vt == VT_UI4) {
-                celsius = valueVar.ulVal / 10.0 - 273.15;
+            auto readKelvin = [&](const wchar_t* property, double divisor) {
+                VARIANT raw{};
+                object->Get(property, 0, &raw, nullptr, nullptr);
+                double kelvin = 0;
+                if (raw.vt == VT_I4) kelvin = raw.lVal / divisor;
+                if (raw.vt == VT_UI4) kelvin = raw.ulVal / divisor;
+                VariantClear(&raw);
+                double c = kelvin - 273.15;
+                return c > 0 && c < 150 ? c : -1.0;
+            };
+            double celsius = readKelvin(performanceCounters
+                ? L"HighPrecisionTemperature" : L"CurrentTemperature", 10);
+            if (performanceCounters && celsius < 0) {
+                celsius = readKelvin(L"Temperature", 1);
             }
-            VariantClear(&valueVar);
             object->Release();
             if (celsius > 0 && celsius < 150 &&
                 (!best || celsius > *best)) {
@@ -802,6 +1443,7 @@ class WmiConnection {
 struct TemperatureSources {
     WmiConnection ohm;
     WmiConnection acpi;
+    WmiConnection perfZones;
 
     double Read() {
         if (ohm.Ensure(L"ROOT\\OpenHardwareMonitor")) {
@@ -810,9 +1452,12 @@ struct TemperatureSources {
             }
         }
         if (acpi.Ensure(L"ROOT\\WMI")) {
-            if (auto t = acpi.QueryAcpiTemperature()) {
+            if (auto t = acpi.QueryZoneTemperature(false)) {
                 return *t;
             }
+        }
+        if (perfZones.Ensure(L"ROOT\\CIMV2")) {
+            if (auto t = perfZones.QueryZoneTemperature(true)) return *t;
         }
         return -1;
     }
@@ -843,7 +1488,7 @@ void WorkerMain() {
         if (auto cpu = ReadCpuLoad()) {
             snapshot.cpuPct = *cpu;
         }
-        snapshot.ramPct = ReadRamPct();
+        if (settings.showRam) ReadRam(snapshot);
 
         if (settings.showNet) {
             const auto [down, up] = ReadNetwork(network, snapshot.netAvailable);
@@ -853,7 +1498,7 @@ void WorkerMain() {
             network = {};
         }
 
-        if (nvml.Ensure()) {
+        if (settings.showGpu && nvml.Ensure()) {
             double util = -1, temp = -1;
             if (nvml.Sample(util, temp, settings.showTemps)) {
                 if (util >= 0) {
@@ -865,14 +1510,14 @@ void WorkerMain() {
                 snapshot.gpuAvailable = true;
             }
         }
-        if (snapshot.gpuPct < 0) {
+        if (settings.showGpu && snapshot.gpuPct < 0) {
             if (auto util = pdhGpu.Sample()) {
                 snapshot.gpuPct = *util;
                 snapshot.gpuAvailable = true;
             }
         }
 
-        if (settings.showTemps) {
+        if (settings.showCpu && settings.showTemps) {
             if (auto sharedTemp = sensor.Read()) {
                 lastCpuTemp = *sharedTemp;
                 nextWmi = {};
@@ -1000,6 +1645,7 @@ Palette CurrentPalette(bool dark) {
 [[clang::no_destroy]] wuxc::TextBlock g_gpuValue{nullptr};
 [[clang::no_destroy]] wuxc::TextBlock g_gpuTemp{nullptr};
 [[clang::no_destroy]] wuxc::TextBlock g_ramValue{nullptr};
+[[clang::no_destroy]] wuxc::TextBlock g_uptime{nullptr};
 [[clang::no_destroy]] wuxc::TextBlock g_netDown{nullptr};
 [[clang::no_destroy]] wuxc::TextBlock g_netUp{nullptr};
 [[clang::no_destroy]] wuxm::SolidColorBrush g_textBrush{nullptr};
@@ -1082,18 +1728,18 @@ wuxc::TextBlock MakeTextBlock(double size, Color color) {
 // https://github.com/Nieobie/game-icon-pack
 constexpr double kIconBox = 16.0;
 
-void AppendRoundedRect(wuxm::PathGeometry const& geometry, double left,
-                       double top, double width, double height, double radius) {
+void AppendRoundedRect(wuxm::PathGeometry const& geometry, float left,
+                       float top, float width, float height, float radius) {
     wuxm::PathFigure figure;
     figure.StartPoint(wf::Point{left + radius, top});
     auto segments = figure.Segments();
 
-    auto lineTo = [&](double x, double y) {
+    auto lineTo = [&](float x, float y) {
         wuxm::LineSegment segment;
         segment.Point(wf::Point{x, y});
         segments.Append(segment);
     };
-    auto arcTo = [&](double x, double y) {
+    auto arcTo = [&](float x, float y) {
         wuxm::ArcSegment segment;
         segment.Point(wf::Point{x, y});
         segment.Size(wf::Size{radius, radius});
@@ -1210,12 +1856,12 @@ wux::FrameworkElement MakeRamIcon(const wuxm::SolidColorBrush& brush) {
     wuxm::PathFigure card;
     card.StartPoint(wf::Point{5.0, 2.3});
     auto segments = card.Segments();
-    auto lineTo = [&](double x, double y) {
+    auto lineTo = [&](float x, float y) {
         wuxm::LineSegment segment;
         segment.Point(wf::Point{x, y});
         segments.Append(segment);
     };
-    auto arcTo = [&](double x, double y, double radius) {
+    auto arcTo = [&](float x, float y, float radius) {
         wuxm::ArcSegment segment;
         segment.Point(wf::Point{x, y});
         segment.Size(wf::Size{radius, radius});
@@ -1308,7 +1954,8 @@ void UpdateRightMargin() {
         g_taskbarWindow = FindWindowW(L"Shell_TrayWnd", nullptr);
     }
 
-    double margin = 250;
+    const int gap = CurrentSettings().trayGap;
+    double margin = 244 + gap;
     if (g_taskbarWindow) {
         if (HWND tray = FindWindowExW(g_taskbarWindow, nullptr,
                                       L"TrayNotifyWnd", nullptr)) {
@@ -1322,8 +1969,8 @@ void UpdateRightMargin() {
                     g_rootGrid ? g_rootGrid.ActualWidth() : 0;
                 const double trayLeft =
                     (trayRect.left - taskbarRect.left) / scale;
-                margin = rootWidth > 0 ? rootWidth - trayLeft + 6
-                                       : (trayRect.right - trayRect.left) / scale + 6;
+                margin = (rootWidth > 0 ? rootWidth - trayLeft
+                                        : (trayRect.right - trayRect.left) / scale) + gap;
             }
         }
     }
@@ -1346,6 +1993,7 @@ void ApplyWidthLimits(const Snapshot& snapshot, const Settings& settings) {
         return;
     }
     const double available = std::max(80.0, rootWidth - g_rightMargin - 14);
+    if (g_uptime) g_uptime.Visibility(wux::Visibility::Visible);
 
     if (g_netGroup) {
         g_netGroup.Visibility(settings.showNet && snapshot.netAvailable ? wux::Visibility::Visible
@@ -1370,6 +2018,10 @@ void ApplyWidthLimits(const Snapshot& snapshot, const Settings& settings) {
 
     if (desiredWidth() <= available) {
         return;
+    }
+    if (g_uptime) {
+        g_uptime.Visibility(wux::Visibility::Collapsed);
+        if (desiredWidth() <= available) return;
     }
     if (g_netGroup) {
         g_netGroup.Visibility(wux::Visibility::Collapsed);
@@ -1403,8 +2055,22 @@ void UpdateTexts() {
     }
 
     SetText(g_cpuValue, FormatPercent(snapshot.cpuPct));
-    SetText(g_ramValue, FormatPercent(snapshot.ramPct));
     const auto settings = CurrentSettings();
+    if (settings.ramDisplay == RamDisplay::Percent) {
+        SetText(g_ramValue, FormatPercent(snapshot.ramPct));
+    } else {
+        const double gib = settings.ramDisplay == RamDisplay::Used ? snapshot.usedGiB : snapshot.freeGiB;
+        wchar_t value[32] = L"-";
+        if (gib >= 0) swprintf(value, 32, L"%.1f GiB", gib);
+        SetText(g_ramValue, value);
+    }
+    if (g_uptime) {
+        const auto minutes = GetTickCount64() / 60000;
+        wchar_t value[40];
+        swprintf(value, 40, settings.showIcons ? L"\u2191 %llu:%02llu" : L"%llu:%02llu",
+                 minutes / 60, minutes % 60);
+        SetText(g_uptime, value);
+    }
 
     if (g_cpuTemp) {
         SetText(g_cpuTemp, settings.showTemps ? FormatTemp(snapshot.cpuTemp)
@@ -1495,6 +2161,7 @@ void BuildContent() {
     g_gpuValue = nullptr;
     g_gpuTemp = nullptr;
     g_ramValue = nullptr;
+    g_uptime = nullptr;
     g_netDown = nullptr;
     g_netUp = nullptr;
 
@@ -1509,6 +2176,7 @@ void BuildContent() {
 
     g_row = wuxc::StackPanel{};
     g_row.Orientation(wuxc::Orientation::Horizontal);
+    g_row.Spacing(settings.metricGap);
     g_row.VerticalAlignment(wux::VerticalAlignment::Center);
     auto makeIcon = [&](IconKind icon) {
         wuxc::Viewbox box;
@@ -1523,7 +2191,6 @@ void BuildContent() {
         wuxc::StackPanel group;
         group.Orientation(wuxc::Orientation::Horizontal);
         group.VerticalAlignment(wux::VerticalAlignment::Center);
-        group.Margin(wux::Thickness{0, 0, 13, 0});
         if (settings.showIcons) {
             group.Children().Append(makeIcon(icon));
         }
@@ -1540,7 +2207,7 @@ void BuildContent() {
         g_cpuTemp.Margin(wux::Thickness{size / 2, 0, 0, 0});
         g_cpuGroup.Children().Append(g_cpuTemp);
     }
-    g_row.Children().Append(g_cpuGroup);
+    if (settings.showCpu) g_row.Children().Append(g_cpuGroup);
 
     // GPU
     g_gpuGroup = makeGroup(IconKind::Gpu, L"GPU");
@@ -1551,14 +2218,17 @@ void BuildContent() {
         g_gpuTemp.Margin(wux::Thickness{size / 2, 0, 0, 0});
         g_gpuGroup.Children().Append(g_gpuTemp);
     }
-    g_row.Children().Append(g_gpuGroup);
+    if (settings.showGpu) g_row.Children().Append(g_gpuGroup);
 
     // RAM
     g_ramGroup = makeGroup(IconKind::Ram, L"RAM");
     g_ramValue = MakeTextBlock(size, palette.text);
     g_ramGroup.Children().Append(g_ramValue);
-    g_ramGroup.Margin(wux::Thickness{0, 0, 13, 0});
-    g_row.Children().Append(g_ramGroup);
+    if (settings.showRam) g_row.Children().Append(g_ramGroup);
+    if (settings.showUptime) {
+        g_uptime = MakeTextBlock(size, palette.text);
+        g_row.Children().Append(g_uptime);
+    }
 
     // Network
     if (settings.showNet) {
@@ -1570,20 +2240,19 @@ void BuildContent() {
         downPanel.Orientation(wuxc::Orientation::Horizontal);
         downPanel.VerticalAlignment(wux::VerticalAlignment::Center);
         downPanel.Margin(wux::Thickness{0, 0, 9, 0});
-        downPanel.Children().Append(makeIcon(IconKind::ArrowDown));
+        if (settings.showIcons) downPanel.Children().Append(makeIcon(IconKind::ArrowDown));
         g_netDown = MakeTextBlock(size, palette.text);
         downPanel.Children().Append(g_netDown);
 
         auto upPanel = wuxc::StackPanel{};
         upPanel.Orientation(wuxc::Orientation::Horizontal);
         upPanel.VerticalAlignment(wux::VerticalAlignment::Center);
-        upPanel.Children().Append(makeIcon(IconKind::ArrowUp));
+        if (settings.showIcons) upPanel.Children().Append(makeIcon(IconKind::ArrowUp));
         g_netUp = MakeTextBlock(size, palette.text);
         upPanel.Children().Append(g_netUp);
 
         g_netGroup.Children().Append(downPanel);
         g_netGroup.Children().Append(upPanel);
-        g_netGroup.Margin(wux::Thickness{0, 0, 6, 0});
         g_row.Children().Append(g_netGroup);
     }
 
@@ -1698,6 +2367,7 @@ void AttachToTaskbarFrame(wux::FrameworkElement frame) {
         g_gpuValue = nullptr;
         g_gpuTemp = nullptr;
         g_ramValue = nullptr;
+        g_uptime = nullptr;
         g_netDown = nullptr;
         g_netUp = nullptr;
         if (g_timer) {
@@ -1780,6 +2450,7 @@ int WINAPI MeasureFrame_Hook(void* self, wf::Size size, wf::Size* resultSize) {
 }
 
 bool HookTaskbarViewSymbols(HMODULE module) {
+    // Taskbar.View.dll, ExplorerExtensions.dll
     WindhawkUtils::SYMBOL_HOOK hooks[] = {{
         {LR"(public: __cdecl winrt::Taskbar::implementation::TaskbarFrame::TaskbarFrame(void))"},
         &TaskbarFrame_Constructor_Original,
@@ -1889,13 +2560,13 @@ void RecoverExistingTaskbar() {
     DWORD tid = GetWindowThreadProcessId(tray, &pid);
     HMODULE module = GetModuleHandleW(L"taskbar.dll");
     if (!tid || pid != GetCurrentProcessId() || !module || g_attached) return;
-    WindhawkUtils::SYMBOL_HOOK symbols[] = {
+    WindhawkUtils::SYMBOL_HOOK taskbarDllHooks[] = {
         {{LR"(const CTaskBand::`vftable'{for `ITaskListWndSite'})"}, &g_siteVtable},
         {{LR"(public: virtual class std::shared_ptr<class TaskbarHost> __cdecl CTaskBand::GetTaskbarHost(void)const )"}, &g_getHost},
         {{LR"(public: int __cdecl TaskbarHost::FrameHeight(void)const )"}, &g_frameHeight},
         {{LR"(public: void __cdecl std::_Ref_count_base::_Decref(void))"}, &g_releaseHost},
     };
-    if (!WindhawkUtils::HookSymbols(module, symbols, std::size(symbols))) return;
+    if (!WindhawkUtils::HookSymbols(module, taskbarDllHooks, std::size(taskbarDllHooks))) return;
     g_attachMessage = RegisterWindowMessageW(L"SysBar.AttachExistingTaskbar");
     if (!g_attachMessage) return;
     HHOOK hook = SetWindowsHookExW(WH_CALLWNDPROC,
@@ -1932,6 +2603,7 @@ LRESULT CALLBACK MessageWindowProc(HWND window, UINT message, WPARAM wparam,
             }
         } else if (wparam == 0 && g_host) {
             BuildContent();
+            UpdateRightMargin();
             UpdateTexts();
         }
         return 0;
@@ -2055,6 +2727,7 @@ void DestroyUi() {
         g_gpuValue = nullptr;
         g_gpuTemp = nullptr;
         g_ramValue = nullptr;
+        g_uptime = nullptr;
         g_netDown = nullptr;
         g_netUp = nullptr;
         g_textBrush = nullptr;

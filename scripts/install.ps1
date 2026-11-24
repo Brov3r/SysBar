@@ -6,7 +6,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 $modId = "sysbar-taskbar-monitor"
-$modVersion = "1.1.1"
+$modVersion = "1.2.0"
 $root = Split-Path -Parent $PSScriptRoot
 $windhawkData = Join-Path $env:ProgramData "Windhawk"
 $modsDir = Join-Path $windhawkData "Engine\Mods\64"
@@ -42,7 +42,7 @@ New-Item -ItemType Directory -Force -Path $modsDir | Out-Null
 # Windhawk reads the mod page and settings schema from the ID-named source.
 $sourceDir = Join-Path $windhawkData "ModsSource"
 New-Item -ItemType Directory -Force -Path $sourceDir | Out-Null
-Copy-Item -LiteralPath (Join-Path $root "mods\SysBar.wh.cpp") -Destination (Join-Path $sourceDir "$modId.wh.cpp") -Force
+Copy-Item -LiteralPath (Join-Path $root "mods\$modId.wh.cpp") -Destination (Join-Path $sourceDir "$modId.wh.cpp") -Force
 
 # Remove previous copies of this mod. A copy loaded into explorer.exe is locked
 # until explorer restarts, so locked files are cleaned up afterwards.
@@ -60,12 +60,35 @@ $dllName = "{0}_{1}_{2}.dll" -f $modId, $modVersion, $suffix
 $targetDll = Join-Path $modsDir $dllName
 Copy-Item -Path $builtDll -Destination $targetDll -Force
 
-New-Item -Path $configKey -Force | Out-Null
+if (-not (Test-Path $configKey)) {
+    New-Item -Path $configKey | Out-Null
+}
 New-ItemProperty -Path $configKey -Name "LibraryFileName" -Value $dllName -PropertyType String -Force | Out-Null
 New-ItemProperty -Path $configKey -Name "Architecture" -Value "x86-64" -PropertyType String -Force | Out-Null
 New-ItemProperty -Path $configKey -Name "Include" -Value "explorer.exe" -PropertyType String -Force | Out-Null
 New-ItemProperty -Path $configKey -Name "Disabled" -Value 0 -PropertyType DWord -Force | Out-Null
 New-ItemProperty -Path $configKey -Name "Version" -Value $modVersion -PropertyType String -Force | Out-Null
+
+# Manual installs bypass Windhawk's initialization of settings from YAML.
+# Write missing defaults only, so zero remains a valid user-selected gap.
+$settingsKey = Join-Path $configKey "Settings"
+if (-not (Test-Path $settingsKey)) { New-Item $settingsKey | Out-Null }
+$defaults = @{
+    'metrics.hideCpu'=0; 'metrics.hideGpu'=0; 'metrics.hideRam'=0; 'metrics.showNet'=1
+    'metrics.ramDisplay'='percent'; 'metrics.showUptime'=0
+    'appearance.fontSize'=12; 'appearance.showIcons'=1; 'appearance.metricGap'=13; 'appearance.trayGap'=6
+    'temperature.showTemps'=1; 'temperature.warnTemp'=75; 'temperature.critTemp'=88
+    'operation.intervalSeconds'=1; 'operation.debugLog'=0
+}
+$existing = (Get-Item $settingsKey).GetValueNames()
+foreach ($key in $defaults.Keys) {
+    if ($existing -notcontains $key) {
+        $oldKey = $key.Split('.')[1]
+        $value = (Get-Item $settingsKey).GetValue($oldKey, $defaults[$key])
+        $type = if ($defaults[$key] -is [string]) { 'String' } else { 'DWord' }
+        New-ItemProperty $settingsKey -Name $key -Value $value -PropertyType $type | Out-Null
+    }
+}
 
 Write-Host "Installed '$modId' as '$dllName'."
 

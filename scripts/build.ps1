@@ -8,7 +8,7 @@ $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 $compilerRoot = Join-Path $windhawkRoot "Compiler"
 $clang = Join-Path $compilerRoot "bin\clang++.exe"
-$source = Join-Path $root "mods\SysBar.wh.cpp"
+$source = Join-Path $root "mods\sysbar-taskbar-monitor.wh.cpp"
 $outputDir = Join-Path $root "build"
 $output = Join-Path $outputDir "SysBar.dll"
 New-Item -ItemType Directory -Force -Path $outputDir | Out-Null
@@ -41,7 +41,7 @@ $arguments = @(
     "-DUNICODE", "-D_UNICODE",
     "-DWINVER=0x0A00", "-D_WIN32_WINNT=0x0A00", "-D_WIN32_IE=0x0A00",
     "-DNTDDI_VERSION=0x0A000008", "-D__USE_MINGW_ANSI_STDIO=0",
-    "-DWH_MOD", '-DWH_MOD_ID=L\"sysbar-taskbar-monitor\"', '-DWH_MOD_VERSION=L\"1.1.1\"',
+    "-DWH_MOD", '-DWH_MOD_ID=L\"sysbar-taskbar-monitor\"', '-DWH_MOD_VERSION=L\"1.2.0\"',
     "-include", "winsock2.h", "-include", "windhawk_api.h",
     "-Wno-pragma-pack",
     "-Wno-pragma-system-header-outside-header",
