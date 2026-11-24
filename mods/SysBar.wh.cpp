@@ -4,7 +4,7 @@
 // @description     CPU and GPU load and temperature, RAM usage and network speed with icons, embedded into the Windows 11 taskbar
 // @name:ru-RU      SysBar — монитор панели задач
 // @description:ru-RU Загрузка и температура CPU и GPU, использование памяти и скорость сети в панели задач Windows 11.
-// @version         1.1.0
+// @version         1.1.1
 // @author          Brov3r
 // @include         explorer.exe
 // @architecture    x86-64
@@ -1008,6 +1008,8 @@ Palette CurrentPalette(bool dark) {
 [[clang::no_destroy]] wux::DispatcherTimer g_timer{nullptr};
 [[clang::no_destroy]] wux::DispatcherTimer g_retryTimer{nullptr};
 [[clang::no_destroy]] wux::FrameworkElement g_pendingFrame{nullptr};
+[[clang::no_destroy]] wux::FrameworkElement g_measuredFrame{nullptr};
+std::atomic<bool> g_attached{false};
 // Only the primary taskbar thread subscribes and revokes these handlers.
 [[clang::no_destroy]] std::vector<std::pair<winrt::weak_ref<wux::FrameworkElement>,
                                            winrt::event_token>> g_loadedHandlers;
@@ -1707,6 +1709,7 @@ void AttachToTaskbarFrame(wux::FrameworkElement frame) {
     g_rootGrid = root;
     g_xamlRoot = frame.XamlRoot();
     CreateUi();
+    g_attached = true;
     DebugLog(L"widget attached: root=%.0fx%.0f margin=%.0f scale=%.2f",
              g_rootGrid.ActualWidth(), g_rootGrid.ActualHeight(), g_rightMargin,
              g_xamlRoot ? g_xamlRoot.RasterizationScale() : -1.0);
@@ -1752,11 +1755,40 @@ void* WINAPI TaskbarFrame_Constructor_Hook(void* pThis) {
     return result;
 }
 
+// The constructor and Loaded event can both precede Windhawk at sign-in.
+// Recover on the next layout pass, but modify the tree outside MeasureOverride.
+using MeasureFrame_t = int(WINAPI*)(void*, wf::Size, wf::Size*);
+MeasureFrame_t MeasureFrame_Original = nullptr;
+int WINAPI MeasureFrame_Hook(void* self, wf::Size size, wf::Size* resultSize) {
+    int result = MeasureFrame_Original(self, size, resultSize);
+    if (SUCCEEDED(result) && !g_unloading && !g_attached &&
+        FindPrimaryTaskbarOnCurrentThread() && !g_measuredFrame && !g_retryTimer) {
+        wux::FrameworkElement frame{nullptr};
+        static_cast<IUnknown*>(self)->QueryInterface(
+            winrt::guid_of<wux::FrameworkElement>(), winrt::put_abi(frame));
+        if (frame) {
+            EnsureMessageWindow();
+            if (HWND window = g_msgWindow.load()) {
+                g_measuredFrame = frame;
+                if (!PostMessageW(window, kRunOnTaskbarThreadMessage, 2, 0)) {
+                    g_measuredFrame = nullptr;
+                }
+            }
+        }
+    }
+    return result;
+}
+
 bool HookTaskbarViewSymbols(HMODULE module) {
     WindhawkUtils::SYMBOL_HOOK hooks[] = {{
         {LR"(public: __cdecl winrt::Taskbar::implementation::TaskbarFrame::TaskbarFrame(void))"},
         &TaskbarFrame_Constructor_Original,
         TaskbarFrame_Constructor_Hook,
+    }, {
+        {LR"(public: virtual int __cdecl winrt::impl::produce<struct winrt::Taskbar::implementation::TaskbarFrame,struct winrt::Windows::UI::Xaml::IFrameworkElementOverrides>::MeasureOverride(struct winrt::Windows::Foundation::Size,struct winrt::Windows::Foundation::Size *))"},
+        &MeasureFrame_Original,
+        MeasureFrame_Hook,
+        true,  // Keep constructor support on builds without this symbol.
     }};
     return WindhawkUtils::HookSymbols(module, hooks, std::size(hooks));
 }
@@ -1810,6 +1842,79 @@ HMODULE WINAPI LoadLibraryExW_Hook(LPCWSTR fileName, HANDLE file,
 // Cross-thread runner for the taskbar UI thread
 // ---------------------------------------------------------------------------
 
+// When Explorer already owns a fully laid out taskbar, no constructor or
+// measure callback is guaranteed. Resolve the existing TaskbarHost as in
+// Windhawk's taskbar-notification-icon-spacing mod (Windows x64).
+void* g_siteVtable = nullptr;
+void* (WINAPI* g_getHost)(void*, void**) = nullptr;
+BYTE* g_frameHeight = nullptr;
+void (WINAPI* g_releaseHost)(void*) = nullptr;
+UINT g_attachMessage = 0;
+
+void AttachExistingFrame(HWND tray) {
+    if (g_attached || g_unloading) return;
+    HWND band = static_cast<HWND>(GetPropW(tray, L"TaskbandHWND"));
+    auto site = band ? reinterpret_cast<void**>(GetWindowLongPtrW(band, 0)) : nullptr;
+    if (!site) return;
+    int i = 0;
+    while (i < 20 && site[i] != g_siteVtable) ++i;
+    if (i == 20) return;
+    // FrameHeight accesses the frame member via `sub rsp,N; add rcx,offset`.
+    const BYTE* b = g_frameHeight;
+    if (b[0] != 0x48 || b[1] != 0x83 || b[2] != 0xec ||
+        b[4] != 0x48 || b[5] != 0x83 || b[6] != 0xc1 || b[7] > 0x7f) return;
+    void* host[2]{};
+    g_getHost(site + i, host);
+    wux::FrameworkElement element{nullptr};
+    if (host[0] && host[1]) {
+        auto unk = *reinterpret_cast<IUnknown**>(static_cast<BYTE*>(host[0]) + b[7]);
+        if (unk) unk->QueryInterface(winrt::guid_of<wux::FrameworkElement>(),
+                                     winrt::put_abi(element));
+    }
+    if (host[1]) g_releaseHost(host[1]);
+    if (element) {
+        auto root = element.XamlRoot();
+        auto frame = root && root.Content() ?
+            root.Content().try_as<wux::FrameworkElement>() : nullptr;
+        if (frame && winrt::get_class_name(frame) == L"Taskbar.TaskbarFrame")
+            AttachToTaskbarFrame(frame);
+        else if (winrt::get_class_name(element) == L"Taskbar.TaskbarFrame")
+            AttachToTaskbarFrame(element);
+    }
+}
+
+void RecoverExistingTaskbar() {
+    HWND tray = FindWindowW(L"Shell_TrayWnd", nullptr);
+    DWORD pid = 0;
+    DWORD tid = GetWindowThreadProcessId(tray, &pid);
+    HMODULE module = GetModuleHandleW(L"taskbar.dll");
+    if (!tid || pid != GetCurrentProcessId() || !module || g_attached) return;
+    WindhawkUtils::SYMBOL_HOOK symbols[] = {
+        {{LR"(const CTaskBand::`vftable'{for `ITaskListWndSite'})"}, &g_siteVtable},
+        {{LR"(public: virtual class std::shared_ptr<class TaskbarHost> __cdecl CTaskBand::GetTaskbarHost(void)const )"}, &g_getHost},
+        {{LR"(public: int __cdecl TaskbarHost::FrameHeight(void)const )"}, &g_frameHeight},
+        {{LR"(public: void __cdecl std::_Ref_count_base::_Decref(void))"}, &g_releaseHost},
+    };
+    if (!WindhawkUtils::HookSymbols(module, symbols, std::size(symbols))) return;
+    g_attachMessage = RegisterWindowMessageW(L"SysBar.AttachExistingTaskbar");
+    if (!g_attachMessage) return;
+    HHOOK hook = SetWindowsHookExW(WH_CALLWNDPROC,
+        [](int code, WPARAM wp, LPARAM lp) -> LRESULT {
+            if (code == HC_ACTION) {
+                auto msg = reinterpret_cast<const CWPSTRUCT*>(lp);
+                if (msg->message == g_attachMessage) {
+                    try { AttachExistingFrame(msg->hwnd); }
+                    catch (...) { Wh_Log(L"SysBar: existing taskbar unavailable"); }
+                }
+            }
+            return CallNextHookEx(nullptr, code, wp, lp);
+        }, nullptr, tid);
+    if (hook) {
+        SendMessageW(tray, g_attachMessage, 0, 0);
+        UnhookWindowsHookEx(hook);
+    }
+}
+
 void DestroyUi();
 
 LRESULT CALLBACK MessageWindowProc(HWND window, UINT message, WPARAM wparam,
@@ -1817,6 +1922,14 @@ LRESULT CALLBACK MessageWindowProc(HWND window, UINT message, WPARAM wparam,
     if (message == kRunOnTaskbarThreadMessage) {
         if (g_unloading) {
             if (wparam == 1) DestroyUi();
+        } else if (wparam == 2 && g_measuredFrame) {
+            auto frame = std::move(g_measuredFrame);
+            try {
+                if (!g_attached && frame.XamlRoot()) AttachToTaskbarFrame(frame);
+            } catch (...) {
+                Wh_Log(L"SysBar: layout attach failed: %08X",
+                       static_cast<unsigned>(winrt::to_hresult()));
+            }
         } else if (wparam == 0 && g_host) {
             BuildContent();
             UpdateTexts();
@@ -1891,6 +2004,7 @@ void Wh_ModAfterInit() {
             HandleLoadedModuleIfTaskbarView(module, nullptr, true);
         }
     }
+    RecoverExistingTaskbar();
 }
 
 void Wh_ModSettingsChanged() {
@@ -1947,6 +2061,8 @@ void DestroyUi() {
         g_warnBrush = nullptr;
         g_critBrush = nullptr;
         g_rootGrid = nullptr;
+        g_attached = false;
+        g_measuredFrame = nullptr;
         g_pendingFrame = nullptr;
         g_xamlRoot = nullptr;
         if (g_msgWindow) {

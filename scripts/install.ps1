@@ -6,7 +6,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 $modId = "sysbar-taskbar-monitor"
-$modVersion = "1.1.0"
+$modVersion = "1.1.1"
 $root = Split-Path -Parent $PSScriptRoot
 $windhawkData = Join-Path $env:ProgramData "Windhawk"
 $modsDir = Join-Path $windhawkData "Engine\Mods\64"
@@ -38,6 +38,11 @@ if (-not (Test-Path $builtDll)) {
 }
 
 New-Item -ItemType Directory -Force -Path $modsDir | Out-Null
+
+# Windhawk reads the mod page and settings schema from the ID-named source.
+$sourceDir = Join-Path $windhawkData "ModsSource"
+New-Item -ItemType Directory -Force -Path $sourceDir | Out-Null
+Copy-Item -LiteralPath (Join-Path $root "mods\SysBar.wh.cpp") -Destination (Join-Path $sourceDir "$modId.wh.cpp") -Force
 
 # Remove previous copies of this mod. A copy loaded into explorer.exe is locked
 # until explorer restarts, so locked files are cleaned up afterwards.

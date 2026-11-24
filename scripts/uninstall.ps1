@@ -28,6 +28,10 @@ Get-ChildItem -Path $modsDir -Filter "$modId`_*.dll" -ErrorAction SilentlyContin
         }
     }
 Write-Host "Removed compiled mod files."
+$sourceFile = Join-Path $windhawkData "ModsSource\$modId.wh.cpp"
+if (Test-Path -LiteralPath $sourceFile) {
+    Remove-Item -LiteralPath $sourceFile -Force
+}
 
 # Remove the sensor helper.
 Unregister-ScheduledTask -TaskName "SysBar Sensor" -Confirm:$false -ErrorAction SilentlyContinue
