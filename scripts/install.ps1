@@ -6,7 +6,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 $modId = "sysbar-taskbar-monitor"
-$modVersion = "1.2.0"
+$modVersion = "1.2.1"
 $root = Split-Path -Parent $PSScriptRoot
 $windhawkData = Join-Path $env:ProgramData "Windhawk"
 $modsDir = Join-Path $windhawkData "Engine\Mods\64"
@@ -78,7 +78,7 @@ $defaults = @{
     'metrics.ramDisplay'='percent'; 'metrics.showUptime'=0
     'appearance.fontSize'=12; 'appearance.showIcons'=1; 'appearance.metricGap'=13; 'appearance.trayGap'=6
     'temperature.showTemps'=1; 'temperature.warnTemp'=75; 'temperature.critTemp'=88
-    'operation.intervalSeconds'=1; 'operation.debugLog'=0
+    'operation.intervalSeconds'=1
 }
 $existing = (Get-Item $settingsKey).GetValueNames()
 foreach ($key in $defaults.Keys) {

@@ -8,6 +8,8 @@
 
 **SysBar** is a [Windhawk](https://windhawk.net/) mod that displays system stats next to the notification area on the Windows 11 taskbar.
 
+[Taskbar System Info](https://windhawk.net/mods/taskbar-system-info) covers many of the same metrics. SysBar is an alternative if you want an uptime reading beside them, scalable drawn icons, or a read-only connection to the optional SysBar Sensor helper. It overlays the primary taskbar rather than reserving space for buttons.
+
 <p align="center">
     <img src="./docs/sysbar-demo.png" alt="SysBar showing CPU and GPU load and temperature, RAM usage, and download and upload speeds">
 </p>

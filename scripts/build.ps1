@@ -41,7 +41,7 @@ $arguments = @(
     "-DUNICODE", "-D_UNICODE",
     "-DWINVER=0x0A00", "-D_WIN32_WINNT=0x0A00", "-D_WIN32_IE=0x0A00",
     "-DNTDDI_VERSION=0x0A000008", "-D__USE_MINGW_ANSI_STDIO=0",
-    "-DWH_MOD", '-DWH_MOD_ID=L\"sysbar-taskbar-monitor\"', '-DWH_MOD_VERSION=L\"1.2.0\"',
+    "-DWH_MOD", '-DWH_MOD_ID=L\"sysbar-taskbar-monitor\"', '-DWH_MOD_VERSION=L\"1.2.1\"',
     "-include", "winsock2.h", "-include", "windhawk_api.h",
     "-Wno-pragma-pack",
     "-Wno-pragma-system-header-outside-header",
@@ -54,7 +54,7 @@ $arguments = @(
     "-o", $output,
     $source,
     "-L", (Join-Path $compilerRoot "x86_64-w64-mingw32\lib"),
-    "-lole32", "-loleaut32", "-lruntimeobject", "-liphlpapi", "-lpdh", "-lwbemuuid", "-lws2_32"
+    "-lole32", "-loleaut32", "-lruntimeobject", "-liphlpapi", "-lpdh", "-lwbemuuid"
 )
 
 Write-Host "Compiling SysBar mod..."
