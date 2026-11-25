@@ -6,7 +6,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 $modId = "sysbar-taskbar-monitor"
-$modVersion = "1.2.1"
+$modVersion = "1.2.2"
 $root = Split-Path -Parent $PSScriptRoot
 $windhawkData = Join-Path $env:ProgramData "Windhawk"
 $modsDir = Join-Path $windhawkData "Engine\Mods\64"

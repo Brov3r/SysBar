@@ -41,7 +41,7 @@ $arguments = @(
     "-DUNICODE", "-D_UNICODE",
     "-DWINVER=0x0A00", "-D_WIN32_WINNT=0x0A00", "-D_WIN32_IE=0x0A00",
     "-DNTDDI_VERSION=0x0A000008", "-D__USE_MINGW_ANSI_STDIO=0",
-    "-DWH_MOD", '-DWH_MOD_ID=L\"sysbar-taskbar-monitor\"', '-DWH_MOD_VERSION=L\"1.2.1\"',
+    "-DWH_MOD", '-DWH_MOD_ID=L\"sysbar-taskbar-monitor\"', '-DWH_MOD_VERSION=L\"1.2.2\"',
     "-include", "winsock2.h", "-include", "windhawk_api.h",
     "-Wno-pragma-pack",
     "-Wno-pragma-system-header-outside-header",

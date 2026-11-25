@@ -42,7 +42,7 @@
 // @description:zh-CN 在 Windows 11 任务栏上显示 CPU 和 GPU 使用率与温度、内存使用率以及网络速度。
 // @name:zh-TW      SysBar — 工作列監視器
 // @description:zh-TW 在 Windows 11 工作列上顯示 CPU 和 GPU 使用率與溫度、記憶體使用率及網路速度。
-// @version         1.2.1
+// @version         1.2.2
 // @author          Brov3r
 // @github          https://github.com/Brov3r
 // @homepage        https://github.com/Brov3r/SysBar
@@ -1868,7 +1868,9 @@ void UpdateRightMargin() {
     }
 
     const int gap = CurrentSettings().trayGap;
-    double margin = 244 + gap;
+    // Fallback for an empty or not yet laid out tray at sign-in: roughly the
+    // tray width at 100% scale, kept independent of the detected geometry.
+    double margin = 256 + gap;
     if (g_taskbarWindow) {
         if (HWND tray = FindWindowExW(g_taskbarWindow, nullptr,
                                       L"TrayNotifyWnd", nullptr)) {
@@ -1882,8 +1884,16 @@ void UpdateRightMargin() {
                     g_rootGrid ? g_rootGrid.ActualWidth() : 0;
                 const double trayLeft =
                     (trayRect.left - taskbarRect.left) / scale;
-                margin = (rootWidth > 0 ? rootWidth - trayLeft
-                                        : (trayRect.right - trayRect.left) / scale) + gap;
+                // At sign-in TrayNotifyWnd can be empty or cover the entire
+                // taskbar. Keep the fallback until it describes a real tray.
+                const bool realTray =
+                    trayRect.right > trayRect.left && trayLeft > 0 &&
+                    rootWidth > trayLeft &&
+                    trayRect.right - trayRect.left <
+                        taskbarRect.right - taskbarRect.left - 64;
+                if (realTray) {
+                    margin = rootWidth - trayLeft + gap;
+                }
             }
         }
     }
@@ -2489,17 +2499,30 @@ wux::FrameworkElement GetTaskbarHostElement(HWND tray) {
     return element;
 }
 
+wux::FrameworkElement FindTaskbarFrame(wux::DependencyObject const& node) {
+    if (!node) return nullptr;
+    if (winrt::get_class_name(node) == L"Taskbar.TaskbarFrame")
+        return node.try_as<wux::FrameworkElement>();
+    const int count = wuxm::VisualTreeHelper::GetChildrenCount(node);
+    for (int i = 0; i < count; ++i) {
+        if (auto frame = FindTaskbarFrame(wuxm::VisualTreeHelper::GetChild(node, i)))
+            return frame;
+    }
+    return nullptr;
+}
+
 void AttachExistingFrame(HWND tray) {
     if (g_attached || g_unloading) return;
     auto element = GetTaskbarHostElement(tray);
     if (element) {
         auto root = element.XamlRoot();
-        auto frame = root && root.Content() ?
-            root.Content().try_as<wux::FrameworkElement>() : nullptr;
-        if (frame && winrt::get_class_name(frame) == L"Taskbar.TaskbarFrame")
-            AttachToTaskbarFrame(frame);
-        else if (winrt::get_class_name(element) == L"Taskbar.TaskbarFrame")
+        if (winrt::get_class_name(element) == L"Taskbar.TaskbarFrame")
             AttachToTaskbarFrame(element);
+        else if (root) {
+            // The frame is not always the direct XamlRoot content.
+            if (auto frame = FindTaskbarFrame(root.Content()))
+                AttachToTaskbarFrame(frame);
+        }
     }
 }
 
@@ -2539,10 +2562,15 @@ void RecoverExistingTaskbar() {
             return CallNextHookEx(nullptr, code, wp, lp);
         }, nullptr, tid);
     if (hook) {
-        SendMessageW(tray, g_attachMessage, 0, 0);
+        // A busy explorer must not block the caller while the shell starts.
+        SendMessageTimeoutW(tray, g_attachMessage, 0, 0,
+                            SMTO_ABORTIFHUNG | SMTO_BLOCK, 1000, nullptr);
         UnhookWindowsHookEx(hook);
     }
 }
+
+std::optional<std::thread> g_attachWorker;
+winrt::handle g_stopAttach;
 
 void DestroyUi();
 
@@ -2637,7 +2665,24 @@ void Wh_ModAfterInit() {
             HandleLoadedModuleIfTaskbarView(module, nullptr, true);
         }
     }
-    RecoverExistingTaskbar();
+    // Explorer can create the window, host and XAML tree on different passes.
+    // Retry until the widget is attached instead of probing only once.
+    g_stopAttach.attach(CreateEventW(nullptr, TRUE, FALSE, nullptr));
+    if (g_stopAttach) {
+        g_attachWorker.emplace([] {
+            DWORD delay = 250;
+            while (!g_unloading && !g_attached) {
+                RecoverExistingTaskbar();
+                if (g_attached ||
+                    WaitForSingleObject(g_stopAttach.get(), delay) != WAIT_TIMEOUT) {
+                    break;
+                }
+                delay = std::min<DWORD>(delay * 2, 5000);
+            }
+        });
+    } else {
+        RecoverExistingTaskbar();
+    }
 }
 
 void Wh_ModSettingsChanged() {
@@ -2650,6 +2695,12 @@ void Wh_ModSettingsChanged() {
 void Wh_ModBeforeUninit() {
     Wh_Log(L"SysBar: before uninit");
     g_unloading = true;
+    if (g_attachWorker) {
+        SetEvent(g_stopAttach.get());
+        g_attachWorker->join();
+        g_attachWorker.reset();
+        g_stopAttach.close();
+    }
     StopWorker();
 
     if (HWND window = g_msgWindow.load()) {
